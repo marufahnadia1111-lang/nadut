@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poyoyoi Pizza - Keranjang</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&display=swap" rel="stylesheet">
+
+<style>
+body {
+  font-family: 'Bagel Fat One', cursive;
+  background: linear-gradient(135deg, #ffd6f2, #c8e4ff);
+  margin:0;
+  padding:20px;
+  color:#f06292;
+}
+button { cursor:pointer; }
+h2 { text-align:center; margin-bottom:20px; }
+
+/* Tombol kembali */
+.back-btn {
+  display:inline-block;
+  background:#ff9acb;
+  color:white;
+  padding:10px 18px;
+  border-radius:12px;
+  text-decoration:none;
+  margin-bottom:15px;
+  box-shadow:0 0 10px #ff7fbd;
+}
+
+/* Grid untuk menu (jika ditampilkan) */
+.grid { display:grid; grid-template-columns: repeat(3,1fr); gap:15px; }
+.card {
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(8px);
+  padding:15px;
+  border-radius:18px;
+  text-align:center;
+  border:2px solid rgba(255,255,255,0.4);
+}
+.card img { width:100%; aspect-ratio:1/1; border-radius:12px; object-fit:cover; }
+
+#cartBox {
+  margin-top:15px;
+  padding:15px;
+  background: rgba(255,255,255,0.25);
+  border-radius:15px;
+  border:2px solid rgba(255,255,255,0.4);
+  backdrop-filter:blur(6px);
+}
+#cartBox ul { padding-left:15px; }
+.cart-btn {
+  padding:8px 14px;
+  margin-left:6px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  transition:0.25s;
+}
+
+/* Checkout Popup */
+#popupStruk {
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.45); backdrop-filter:blur(4px);
+  justify-content:center; align-items:center;
+  animation: fadeIn 0.3s ease;
+}
+#popupStruk div {
+  background:white; padding:20px; border-radius:20px; width:80%; max-width:350px; text-align:center;
+  box-shadow:0 0 15px rgba(0,0,0,0.2); color:#333;
+}
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
+input, textarea {
+  width:100%; padding:10px; margin-bottom:10px;
+  border-radius:10px; border:2px solid #ffbde6;
+  font-family:'Bagel Fat One';
+}
+</style>
+</head>
+<body>
+
+<!-- Tombol kembali -->
+<a class="back-btn" href="index.html">⬅ Back</a>
+
+<h2>Keranjang</h2>
+
+<div id="cartBox">
+  <h3>Pesananmu</h3>
+  <ul id="cartItems"></ul>
+  <p><strong>Total: Rp <span id="totalPrice">0</span></strong></p>
+  <button onclick="checkout()" style="background:#ff9acb; color:black; box-shadow:0 0 10px #ff7fbd;">Checkout</button>
+</div>
+
+<section class="customer-info" style="margin-top:25px; background:rgba(255,255,255,0.25); padding:20px; border-radius:16px; backdrop-filter:blur(6px); border:2px solid rgba(255,255,255,0.4); color:#fff;">
+  <h3>Data Pemesan</h3>
+  <label>Nama Pemesan:</label>
+  <input type="text" id="customerName" placeholder="Masukkan nama kamu">
+
+  <label>Alamat Tujuan:</label>
+  <textarea id="customerAddress" placeholder="Masukkan alamat lengkap"></textarea>
+</section>
+
+<!-- Popup Struk -->
+<div id="popupStruk">
+  <div>
+    <img src="https://cdn-icons-png.flaticon.com/512/6978/6978255.png" style="width:120px; margin-bottom:10px;">
+    <h3>Struk Pemesanan</h3>
+    <p><strong>Nama:</strong> <span id="receiptName"></span></p>
+    <p><strong>Alamat:</strong> <span id="receiptAddress"></span></p>
+    <ul id="popupReceipt"></ul>
+    <p><strong>Total: Rp <span id="receiptTotal">0</span></strong></p>
+    <button onclick="closePopup()" style="margin-top:15px; padding:10px 18px; border:none; border-radius:12px; background:#ff9acb; color:white; cursor:pointer; box-shadow:0 0 10px #ff9acb;">Tutup</button>
+  </div>
+</div>
+
+<script>
+// Load cart dari localStorage
+let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+const cartItems = document.getElementById('cartItems');
+const totalPriceEl = document.getElementById('totalPrice');
+
+updateCart();
+
+// Update tampilan keranjang
+function updateCart() {
+  cartItems.innerHTML = '';
+  let total = 0;
+  cart.forEach((item,index)=>{
+    total += item.price * item.qty;
+    const li = document.createElement('li');
+    li.innerHTML = `
+      ${item.name} x ${item.qty} - Rp ${item.price*item.qty}
+      <button class="cart-btn" onclick="changeQty(${index},1)">+</button>
+      <button class="cart-btn" onclick="changeQty(${index},-1)">-</button>
+      <button class="cart-btn" onclick="removeItem(${index})">Hapus</button>
+    `;
+    cartItems.appendChild(li);
+  });
+  totalPriceEl.textContent = total;
+  localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+// Tambah/Kurang qty
+function changeQty(index,amount){
+  cart[index].qty += amount;
+  if(cart[index].qty<=0) cart.splice(index,1);
+  updateCart();
+}
+
+// Hapus item
+function removeItem(index){
+  cart.splice(index,1);
+  updateCart();
+}
+
+// Checkout → Popup struk
+function checkout(){
+  if(cart.length === 0){
+    alert("Keranjang kosong!");
+    return;
+  }
+  const name = document.getElementById('customerName').value.trim();
+  const address = document.getElementById('customerAddress').value.trim();
+  if(name==='' || address===''){
+    alert("Isi nama dan alamat terlebih dahulu!");
+    return;
+  }
+
+  const receipt = document.getElementById('popupReceipt');
+  receipt.innerHTML = '';
+  cart.forEach(item=>{
+    const li = document.createElement('li');
+    li.textContent = `${item.name} x ${item.qty} - Rp ${item.price*item.qty}`;
+    receipt.appendChild(li);
+  });
+
+  document.getElementById('receiptName').textContent = name;
+  document.getElementById('receiptAddress').textContent = address;
+  document.getElementById('receiptTotal').textContent = cart.reduce((sum,item)=>sum+item.price*item.qty,0);
+
+  document.getElementById('popupStruk').style.display = 'flex';
+
+  // Kosongkan keranjang setelah checkout
+  cart = [];
+  localStorage.removeItem('cart');
+  updateCart();
+}
+
+// Tutup popup
+function closePopup(){
+  document.getElementById('popupStruk').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

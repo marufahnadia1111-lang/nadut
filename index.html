@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poyoyoi Pizza - Home & Menu</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: "Bagel Fat One", cursive;
+  background: linear-gradient(135deg, #ffd6f2, #c8e4ff);
+}
+header {
+  background: linear-gradient(45deg, #ffc6e9, #bfe4ff);
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+.nav-link { text-decoration: none; color: white; font-size: 22px; }
+.searchbar {
+  padding: 10px;
+  width: 260px;
+  border-radius: 25px;
+  border: none;
+  outline: none;
+  text-align: center;
+  font-size: 18px;
+}
+.home-section { text-align: center; padding: 45px 20px; }
+.home-section h1 { font-size: 65px; color: #abc4ff; }
+.home-section p { max-width: 1000px; font-size: 35px; margin: auto; color: #99b7d5; }
+
+.menu-section { padding: 20px; }
+.menu-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 15px; }
+
+.menu-card {
+  background: white; padding:12px; border-radius:15px; text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+.menu-card img { width:100%; aspect-ratio:1/1; border-radius:10px; object-fit:cover; }
+
+.pesan {
+  background: #ff9ada; border: none; padding:10px 15px; border-radius:10px; color:white; width:100%; cursor:pointer; margin-top:8px;
+}
+
+.float-cart {
+  position: fixed; bottom: 25px; right:25px; background:#ffa6df; padding:15px 20px;
+  border-radius:50px; color:white; font-size:22px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  z-index: 999;
+}
+
+/* Popup */
+#addedPopup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #ff9ada;
+  padding: 14px 22px;
+  border-radius: 18px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.4s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+#addedPopup.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="nav-link" href="#home">Home</a>
+  <input id="search" class="searchbar" placeholder="Search menu..." onkeyup="searchMenu()">
+  <a class="nav-link" href="#menu">Menu</a>
+</header>
+
+<div id="addedPopup">✔ Ditambahkan ke keranjang!</div>
+
+<section id="home" class="home-section">
+  <h1>𐙚 Poyoyoi Pizza 𐙚</h1>
+  <p>Hidangan istimewa untuk momen spesial Anda. Nikmati pizza artisan kami yang dibuat dengan bahan-bahan terbaik untuk pengalaman kuliner yang luar biasa. Dapatkan kelezatan yang belum pernah Anda rasakan sebelumnya, dan jadikan setiap santapan sebagai perayaan.</p>
+</section>
+
+<section id="menu" class="menu-section">
+  <div class="menu-grid" id="menuList"></div>
+</section>
+
+<div class="float-cart" onclick="goCart()">🛒 Keranjang</div>
+
+<script>
+// Daftar menu
+const pizzas = [
+  {name:"Pizza Pepperoni", price:30000, img:"pepperoni.jpg"},
+  {name:"Pizza Cheese", price:28000, img:"cheese.jpg"},
+  {name:"Pizza BBQ", price:32000, img:"bbq.png"},
+  {name:"Pizza Tuna", price:31000, img:"tuna.png"},
+  {name:"Pizza Hawaiian", price:33000, img:"hawaiian.jpg"},
+  {name:"Pizza Mushroom", price:29000, img:"mushroom.png"},
+  {name:"Pizza Lava Cheese", price:34000, img:"lava.png"},
+  {name:"Pizza Deluxe", price:35000, img:"deluxe..png"},
+  {name:"Pizza Spicy Fire", price:36000, img:"spicy.png"}
+];
+
+// Render menu
+function loadMenu(){
+  const box = document.getElementById("menuList");
+  pizzas.forEach((p, i)=>{
+    const card = document.createElement('div');
+    card.className = 'menu-card';
+    card.innerHTML = `
+      <img src="${p.img}">
+      <h3>${p.name}</h3>
+      <p>Rp ${p.price}</p>
+      <button class="pesan" onclick="addToCart(${i})">Pesan</button>
+    `;
+    box.appendChild(card);
+  });
+}
+loadMenu();
+
+// Tambah ke keranjang
+function addToCart(i){
+  let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  let found = cart.find(item => item.name === pizzas[i].name);
+  if(found) found.qty++;
+  else cart.push({name:pizzas[i].name, price:pizzas[i].price, qty:1});
+  localStorage.setItem("cart", JSON.stringify(cart));
+  showPopup();
+}
+
+// Popup smooth
+function showPopup(){
+  const popup = document.getElementById("addedPopup");
+  popup.classList.add("show");
+  setTimeout(()=> popup.classList.remove("show"), 1200);
+}
+
+// Search menu
+function searchMenu(){
+  const q = document.getElementById("search").value.toLowerCase();
+  const cards = document.querySelectorAll('.menu-card');
+  pizzas.forEach((p,i)=>{
+    cards[i].style.display = p.name.toLowerCase().includes(q) ? "block":"none";
+  });
+}
+
+function goCart(){ window.location.href="cart.html"; }
+</script>
+
+</body>
+</html>
