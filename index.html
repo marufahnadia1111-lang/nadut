@@ -90,7 +90,26 @@ header {
 
 }
 .home-section { text-align: center; padding: 45px 20px; }
-.home-section h1 { font-size: 65px; color: #abc4ff; }
+.home-section h1 { font-size: 65px; color: #ff6dbf; }
+.glow-text {
+  color: #fff;
+  text-shadow: 
+    0 0 5px #ff9ada,
+    0 0 10px #ff9ada,
+    0 0 20px #ff9ada,
+    0 0 30px #ff6dbf;
+  font-size: 50px;
+  font-weight: bold;
+  animation: pulse 1.5s infinite alternate;
+}
+
+/* Animasi pulse: membesar & mengecil */
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
 .home-section p { max-width: 1000px; font-size: 35px; margin: auto; color: #99b7d5; }
 
 .menu-section { padding: 20px; }
@@ -175,7 +194,7 @@ header {
 <div id="addedPopup">✔ Ditambahkan ke keranjang!</div>
 
 <section id="home" class="home-section">
-  <h1> 𐙚 Poyoyoi Pizza 𐙚</h1>
+  <h1 class="glow-text"> 𐙚 Poyoyoi Pizza 𐙚</h1>
   <p>Hidangan istimewa untuk momen spesial Anda. Nikmati pizza artisan kami yang dibuat dengan bahan-bahan terbaik untuk pengalaman kuliner yang luar biasa. Dapatkan kelezatan yang belum pernah Anda rasakan sebelumnya, dan jadikan setiap santapan sebagai perayaan.</p>
 </section>
 
@@ -247,6 +266,5 @@ function goCart(){ window.location.href="cart.html"; }
 
 </body>
 </html>
-
 
 
